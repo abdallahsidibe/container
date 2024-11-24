@@ -1,0 +1,25 @@
+# traefik/dynamic/conf.yml
+http:
+  routers:
+    web-router:
+      rule: "Host(`frontend.local`)"
+      service: web-service
+      entrypoints:
+        - web
+
+    api-router:
+      rule: "Host(`backend.local`)"
+      service: api-service
+      entrypoints:
+        - web
+
+  services:
+    web-service:
+      loadBalancer:
+        servers:
+          - url: "http://frontend:80"
+
+    api-service:
+      loadBalancer:
+        servers:
+          - url: "http://backend:8080"
