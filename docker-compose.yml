@@ -1,13 +1,9 @@
 services:
   backend:
-    build:
-      context: ./bank-service
-      dockerfile: Dockerfile
+    build: ./bank-service
     container_name: container-app-java
-    environment:
-      DB_URL: jdbc:mysql://mysql:3306/dockertraefik
-      DB_USER: root
-      DB_PASSWORD: root
+    secrets:
+      - db_password
     ports:
       - "8081:8081"
     depends_on:
@@ -21,10 +17,15 @@ services:
     image: mysql:8.0.40-debian
     container_name: container-mysql
     environment:
-      MYSQL_ROOT_PASSWORD: root
-      MYSQL_DATABASE: dockertraefik
-      MYSQL_USER: sidibe
-      MYSQL_PASSWORD: passer123@
+      MYSQL_ROOT_PASSWORD_FILE: /run/secrets/mysql_root_password
+      MYSQL_DATABASE_FILE: /run/secrets/mysql_database
+      MYSQL_USER_FILE: /run/secrets/mysql_user
+      MYSQL_PASSWORD_FILE: /run/secrets/mysql_user_password
+    secrets:
+      - mysql_root_password
+      - mysql_database
+      - mysql_user
+      - mysql_user_password
     ports:
       - "3306:3306"
     volumes: # montage du volume
@@ -39,8 +40,8 @@ services:
     image: phpmyadmin/phpmyadmin:latest
     ports:
       - "8082:80"
-    env_file:
-      - ./.env
+    secrets:
+      - db_password
     depends_on:
       - mysql
     restart: unless-stopped # redemarre juqua disponibilite de service mysql
@@ -50,6 +51,18 @@ services:
 networks:
   app-network:
     driver: bridge
+
+secrets:
+  mysql_root_password:
+    file: mysql_root_password.txt
+  mysql_database:
+    file: mysql_database.txt
+  mysql_user:
+    file: mysql_user.txt
+  mysql_user_password:
+    file: mysql_user_password.txt
+  db_password:
+    file: db_password.txt
 
 # création du volume
 volumes:
